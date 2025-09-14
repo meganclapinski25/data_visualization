@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Alcohol Consumption Data Visualization</title>
+</head>
+<style>
+    /* Put the box in the center of the page */
+    body, html {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    #svg {
+      border: 1px solid;
+    }
+  </style>
+<body>
+    <svg id="svg" width="500" height="500"></svg>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+        function temp(data){
+            
+            // see the first row of the data 
+            console.log("first row:", data[0]);
+            
+            // see scatterplot data for viz 
+            const dots = getScatterData(data);
+            console.log('dots sample:', dots.slice(0,5));
+
+            const xScale = d3.scaleLinear()
+            .domain([1, getScatterData.length])
+            .range([0, 600])
+
+            const yScale = d3.scaleLinear()
+            .domain([0,20])
+            .range([500, 0])
+
+            const svg = d3.select('#svg');
+
+            // Scales (use padding so dots/axes aren’t on the edges)
+            const x = d3.scaleLinear().domain([2, 10]).range([40, 480]); // totalAlc
+            const y = d3.scaleLinear().domain([0, 20]).range([460, 20]); // avgGrade (flip)
+
+            // Axes
+            svg.append('g')
+            .attr('transform', 'translate(0,460)')
+            .call(d3.axisBottom(x).ticks(9));
+
+            svg.append('g')
+            .attr('transform', 'translate(40,0)')
+            .call(d3.axisLeft(y));
+
+            // A few dots (first 60)
+            const jitter = () => (Math.random() - 0.5) * 0.25; // tiny horizontal spread
+            svg.append('g')
+            .selectAll('circle')
+            .data(dots.slice(0,60))
+            .join('circle')
+                .attr('cx', d => x(d.totalAlc + jitter()))
+                .attr('cy', d => y(d.avgGrade))
+                .attr('r', 3.5)
+                .attr('fill', 'steelblue')
+                .attr('opacity', 0.75)
+            .append('title')
+                .text(d => `Total: ${d.totalAlc}\nAvg grade: ${d.avgGrade}`);
+            
+            
+        }
+        
+
+        
+        d3.csv('student-mat.csv')
+        .then(temp)
+
+        // need to get the totalAlc from each student 
+        // need to get average grade from each student 
+        const getScatterData = (data) => 
+        data.map(s => 
+            {
+                const dalc = +s.Dalc;
+                const walc = +s.Walc;
+                const g1 = +s.G1;
+                const g2 = +s.G2;
+                const g3 = +s.G3;
+
+                return {
+                    totalAlc : dalc + walc,
+                    avgGrade : Math.round((g1 + g2 + g3) / 3)
+                };
+
+        });
+        
+
+        // Need to get totalAlc = (Dalc + Walc)
+        // Need to get average Grade (G1+G2+G3)/3
+        // Bin Grades 0-4 5-9 10-14 15-20
+
+        // x axis = total alchol
+        // y axis = grade range 
+        
+
+
+    </script>
+</body>
+</html>
