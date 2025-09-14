@@ -36,7 +36,7 @@
             console.log("Count of dots:", dots.length);
 
             const xScale = d3.scaleLinear()
-            .domain([2 ,20])
+            .domain([0 ,20])
             .range([40, 480])
 
             const yScale = d3.scaleLinear()
@@ -49,23 +49,45 @@
             // Axes
             svg.append('g')
             .attr('transform', 'translate(0,460)')
-            .call(d3.axisBottom(xScale).ticks(9).tickFormat(d3.format("d")));
+            .call(d3.axisBottom(xScale)
+              .tickValues(d3.range(0, 21, 1))   // ticks 0..20 by 1
+              .tickFormat(d3.format('d')));
 
+              svg.append('text')
+                .attr('x', 250)                 // center of 500px wide SVG
+                .attr('y', 495)                 // slightly below axis line
+                .attr('text-anchor', 'middle')
+                .text('Average Grade (G1–G3)');            
+            
             // left axis (alcohol)
             svg.append('g')
             .attr('transform', 'translate(40,0)')
             .call(d3.axisLeft(yScale));
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -250)                // halfway down the SVG after rotation
+                .attr('y', 14)                  // push away from axis
+                .attr('text-anchor', 'middle')
+            
+                .text('Total Weekly Alcohol (Dalc + Walc)');
+
+
+
+            const color = d3.scaleSequential(d3.interpolateRdYlGn) // red→yellow→green
+                .domain([0, 20]); 
+
 
             // A few dots (first 60)
             svg.append('g')
             .selectAll('circle')
             .data(dots)
             .join('circle')
-              .attr('cx', d => xScale(d.totalAlc))    // alcohol on x
-              .attr('cy', d => yScale(d.avgGrade))    // grade on y
+              .attr('cx', d => xScale(d.avgGrade))    // alcohol on x
+              .attr('cy', d => yScale(d.totalAlc))    // grade on y
               .attr('r', 2.5)
-              .attr('fill', 'steelblue')
-              .attr('opacity', 0.5);
+              .attr('fill', d => color(d.avgGrade))
+              .attr('opacity', 1)
             
             
         }
