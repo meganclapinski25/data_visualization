@@ -1,130 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Alcohol Consumption Data Visualization</title>
-</head>
-<style>
-    /* Put the box in the center of the page */
+  <meta charset="UTF-8" />
+  <title>G1 Histogram</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
     body, html {
       height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-  
-    #svg {
-      border: 1px solid;
-    }
+    #svg { border: 1px solid; }
   </style>
+</head>
 <body>
-    <svg id="svg" width="500" height="500"></svg>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    <script>
-        function temp(data){
-            
-            // see the first row of the data 
-            console.log("first row:", data[0]);
-            
-            // see scatterplot data for viz 
-            const dots = getScatterData(data);
-            console.log('dots sample:', dots.slice(0,5));
 
-            console.log("ALL DOTS:", dots);
-            console.log("Count of dots:", dots.length);
+  
+  <svg id="svg" width="500" height="500"></svg>
 
-            const xScale = d3.scaleLinear()
-            .domain([0 ,20])
-            .range([40, 480])
+  <div id ="buttons">
+    <button data-metric="G1" class = "active">G1</button>
+    <button data-metric="G2" class = "active">G2</button>
+    <button data-metric="G3" class = "active">G3</button>
+  </div>
+  
+  
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+    const svg = d3.select('#svg');
+    const W = +svg.attr('width');
+    const H = +svg.attr('height');
+    const M = { top: 28, right: 24, bottom: 56, left: 64 };
+    const innerW = W - M.left - M.right;
+    const innerH = H - M.top - M.bottom;
 
-            const yScale = d3.scaleLinear()
-            .domain([0, 20])
-            .range([460, 20])
+    const g = svg.append('g')
+      .attr('transform', `translate(${M.left},${M.top})`);
 
-            const svg = d3.select('#svg');
+    const x = d3.scaleBand()
+      .domain(d3.range(0,21))
+      .range([0,innerW])
+      .padding(0,1);
 
+    const y = d3.scaleLinear()
+      .domain([0,10])
+      .nice()
+      .range([innerH, 0])
 
-            // Axes
-            svg.append('g')
-            .attr('transform', 'translate(0,460)')
-            .call(d3.axisBottom(xScale)
-              .tickValues(d3.range(0, 21, 1))   // ticks 0..20 by 1
-              .tickFormat(d3.format('d')));
+    const gx = g.append('g')
+      .attr("transform", `translate(0,${innerH})`);
+    const gy = g.append('g');
 
-              svg.append('text')
-                .attr('x', 250)                 // center of 500px wide SVG
-                .attr('y', 495)                 // slightly below axis line
-                .attr('text-anchor', 'middle')
-                .text('Average Grade (G1–G3)');            
-            
-            // left axis (alcohol)
-            svg.append('g')
-            .attr('transform', 'translate(40,0)')
-            .call(d3.axisLeft(yScale));
-            
-            svg.append('text')
-                .attr('transform', 'rotate(-90)')
-                .attr('x', -250)                // halfway down the SVG after rotation
-                .attr('y', 14)                  // push away from axis
-                .attr('text-anchor', 'middle')
-            
-                .text('Total Weekly Alcohol (Dalc + Walc)');
+    // Axis labels
+    svg.append('text')
+      .attr('x', M.left + innerW / 2)
+      .attr('y', H - 12)
+      .attr('text-anchor', 'middle')
+      .text('G1 Grade');
 
+    svg.append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -(M.top + innerH / 2))
+      .attr('y', 18)
+      .attr('text-anchor', 'middle')
+      .text('Mean Alcohol Intake (Work Week + Weekend Consumption');
 
+    gx.call(d3.axisBottom(x).tickValues(d3.range(0, 21)).tickFormat(d3.format('d')));
+    gy.call(d3.axisLeft(y).ticks(6));
+      
+    
+    d3.csv('student-mat.csv')
+      .then(temp)
 
-            const color = d3.scaleSequential(d3.interpolateRdYlGn) // red→yellow→green
-                .domain([0, 20]); 
+      // need to get the totalAlc from each student 
+      // need to get average grade from each student 
+      const getScatterData = (data) => 
+      data.map(s => 
+          {
+              const dalc = +s.Dalc;
+              const walc = +s.Walc;
+              const g1 = +s.G1;
+              const g2 = +s.G2;
+              const g3 = +s.G3;
 
+              return {
+                  totalAlc : dalc + walc,
+                  avgGrade : Math.round((g1 + g2 + g3) / 3)
+              };
 
-            // A few dots (first 60)
-            svg.append('g')
-            .selectAll('circle')
-            .data(dots)
-            .join('circle')
-              .attr('cx', d => xScale(d.avgGrade))    // alcohol on x
-              .attr('cy', d => yScale(d.totalAlc))    // grade on y
-              .attr('r', 2.5)
-              .attr('fill', d => color(d.avgGrade))
-              .attr('opacity', 1)
-            
-            
-        }
-        
-
-        
-        d3.csv('student-mat.csv')
-        .then(temp)
-
-        // need to get the totalAlc from each student 
-        // need to get average grade from each student 
-        const getScatterData = (data) => 
-        data.map(s => 
-            {
-                const dalc = +s.Dalc;
-                const walc = +s.Walc;
-                const g1 = +s.G1;
-                const g2 = +s.G2;
-                const g3 = +s.G3;
-
-                return {
-                    totalAlc : dalc + walc,
-                    avgGrade : Math.round((g1 + g2 + g3) / 3)
-                };
-
-        });
-        
-
-        // Need to get totalAlc = (Dalc + Walc)
-        // Need to get average Grade (G1+G2+G3)/3
-        // Bin Grades 0-4 5-9 10-14 15-20
-
-        // x axis = total alchol
-        // y axis = grade range 
-        
-
-
-    </script>
+      });
+  </script>
 </body>
 </html>
