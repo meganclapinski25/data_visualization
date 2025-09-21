@@ -1,97 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>G1 Histogram</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Grades and Alcohol Intake</title>
   <style>
-    body, html {
+    html {
       height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
+      
     }
-    #svg { border: 1px solid; }
+    button {
+      margin: 10px;
+      padding: 10px;
+    }
   </style>
 </head>
 <body>
-
-  
-  <svg id="svg" width="500" height="500"></svg>
-
-  <div id ="buttons">
-    <button data-metric="G1" class = "active">G1</button>
-    <button data-metric="G2" class = "active">G2</button>
-    <button data-metric="G3" class = "active">G3</button>
-  </div>
-  
-  
-  
-  
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script>
-    const svg = d3.select('#svg');
-    const W = +svg.attr('width');
-    const H = +svg.attr('height');
-    const M = { top: 28, right: 24, bottom: 56, left: 64 };
-    const innerW = W - M.left - M.right;
-    const innerH = H - M.top - M.bottom;
-
-    const g = svg.append('g')
-      .attr('transform', `translate(${M.left},${M.top})`);
-
-    const x = d3.scaleBand()
-      .domain(d3.range(0,21))
-      .range([0,innerW])
-      .padding(0,1);
-
-    const y = d3.scaleLinear()
-      .domain([0,10])
-      .nice()
-      .range([innerH, 0])
-
-    const gx = g.append('g')
-      .attr("transform", `translate(0,${innerH})`);
-    const gy = g.append('g');
-
-    // Axis labels
-    svg.append('text')
-      .attr('x', M.left + innerW / 2)
-      .attr('y', H - 12)
-      .attr('text-anchor', 'middle')
-      .text('G1 Grade');
-
-    svg.append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('x', -(M.top + innerH / 2))
-      .attr('y', 18)
-      .attr('text-anchor', 'middle')
-      .text('Mean Alcohol Intake (Work Week + Weekend Consumption');
-
-    gx.call(d3.axisBottom(x).tickValues(d3.range(0, 21)).tickFormat(d3.format('d')));
-    gy.call(d3.axisLeft(y).ticks(6));
-      
-    
-    d3.csv('student-mat.csv')
-      .then(temp)
-
-      // need to get the totalAlc from each student 
-      // need to get average grade from each student 
-      const getScatterData = (data) => 
-      data.map(s => 
-          {
-              const dalc = +s.Dalc;
-              const walc = +s.Walc;
-              const g1 = +s.G1;
-              const g2 = +s.G2;
-              const g3 = +s.G3;
-
-              return {
-                  totalAlc : dalc + walc,
-                  avgGrade : Math.round((g1 + g2 + g3) / 3)
-              };
-
-      });
-  </script>
+  <h2> Choose G1, G2, G3</h2>
+  <button onclick="window.location.href='g1.html'" >G1</button>  
+  <button onclick="window.location.href='g2.html'">G2</button>  
+  <button onclick="window.location.href='g3.html'">G3</button>  
 </body>
 </html>
