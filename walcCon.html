@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dalc Distribution</title>
+  <style>
+    html {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Workday Alcohol Consumption (Dalc)</h2>
+  <svg id="svg" width="500" height="500"></svg>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+    const svg = d3.select('#svg');
+    const W = +svg.attr('width');
+    const H = +svg.attr('height');
+    const M = {top:28, right:24, bottom:56, left:64};
+    const innerW = W - M.left - M.right;
+    const innerH = H - M.top - M.bottom;
+
+    const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+    const gx = g.append('g').attr('transform', `translate(0,${innerH})`);
+    const gy = g.append('g');
+
+    // Axis labels
+    svg.append('text')
+      .attr('x', M.left + innerW/2).attr('y', H - 12)
+      .attr('text-anchor','middle')
+      .text('Walc (1 = very low, 5 = very high)');
+
+    svg.append('text')
+      .attr('transform','rotate(-90)')
+      .attr('x', -(M.top + innerH/2)).attr('y', 18)
+      .attr('text-anchor','middle')
+      .text('Number of Students');
+
+    d3.csv('student-mat.csv').then(raw => {
+      raw.forEach(d => d.Walc = +d.Walc);
+
+      const LEVELS = d3.range(1,6); // 1–5
+      const counts = d3.rollup(raw, v => v.length, d => d.Walc);
+      const data = LEVELS.map(k => ({ level: k, count: counts.get(k) ?? 0 }));
+
+      const x = d3.scaleBand().domain(LEVELS).range([0, innerW]).padding(0.2);
+      const y = d3.scaleLinear().domain([0, d3.max(data, d => d.count)]).nice().range([innerH, 0]);
+
+      gx.call(d3.axisBottom(x).tickFormat(d3.format('d')));
+      gy.call(d3.axisLeft(y).ticks(6));
+
+      g.selectAll('rect.bar').data(data).enter().append('rect')
+        .attr('class','bar')
+        .attr('x', d => x(d.level))
+        .attr('width', x.bandwidth())
+        .attr('y', innerH).attr('height', 0)
+        .transition().duration(600)
+        .attr('y', d => y(d.count))
+        .attr('height', d => innerH - y(d.count))
+        .attr('fill','steelblue');
+
+      // Labels
+      g.selectAll('text.label').data(data).enter().append('text')
+        .attr('class','label')
+        .attr('x', d => x(d.level) + x.bandwidth()/2)
+        .attr('y', d => y(d.count) - 5)
+        .attr('text-anchor','middle')
+        .style('font-size','10px')
+        .text(d => d.count);
+    });
+  </script>
+</body>
+</html>
