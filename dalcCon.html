@@ -1,3 +1,7 @@
+<!-- This is Work Week Intake (Mon - Fri)-->
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +17,7 @@
   </style>
 </head>
 <body>
-  <h2>Workday Alcohol Consumption (Dalc)</h2>
+  <h2>Workday (Mon - Fri) Alcohol Consumption (Dalc)</h2>
   <svg id="svg" width="500" height="500"></svg>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -33,7 +37,7 @@
     svg.append('text')
       .attr('x', M.left + innerW/2).attr('y', H - 12)
       .attr('text-anchor','middle')
-      .text('Dalc (1 = very low, 5 = very high)');
+      .text('Alcohol Consumption (1 = very low, 5 = very high)');
 
     svg.append('text')
       .attr('transform','rotate(-90)')
@@ -62,7 +66,7 @@
         .transition().duration(600)
         .attr('y', d => y(d.count))
         .attr('height', d => innerH - y(d.count))
-        .attr('fill','steelblue');
+        .attr('fill','maroon');
 
       // Labels
       g.selectAll('text.label').data(data).enter().append('text')
